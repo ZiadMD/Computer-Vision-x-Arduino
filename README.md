@@ -2,20 +2,19 @@
 
 This project demonstrates computer-vision → microcontroller interaction. It uses MediaPipe + OpenCV on the PC to detect facial expressions (smile / neutral / frown) and fingers (0–5). The PC sends short messages to an Arduino over serial; the Arduino lights LEDs according to the received message.
 
-This README explains the code in detail, how the system works, the wiring, how to upload the Arduino sketch, how to run the Python code, tuning tips, and where to place pictures and a video demonstrating the project.
-
 ---
 
-Table of contents
-- Project overview
-- Files and code walkthrough (every important function / class explained)
-- Hardware parts & wiring
-- Arduino sketch: behavior and upload instructions
-- Python: dependencies and running (face and finger modes)
-- Serial protocol and examples
-- Step-by-step build & test guide (do-it-yourself)
-- Tuning & troubleshooting
-- Where to add photos and a demo video
+# Table of contents
+- [Project overview](#project-overview)
+- [Files in the repo (short list)](#files-in-the-repo-short-list)
+- [Code walkthrough — detailed](#code-walkthrough--detailed)
+- [Hardware parts & wiring](#hardware-parts--wiring)
+- [Uploading the Arduino sketch](#uploading-the-arduino-sketch)
+- [Python dependencies & setup](#python-dependencies--setup)
+- [Running the visual programs](#running-the-visual-programs)
+- [Serial protocol summary](#serial-protocol-summary)
+- [Step-by-step build & test guide (DIY)](#step-by-step-build--test-guide-diy)
+- [Tuning & troubleshooting](#tuning--troubleshooting)
 
 ---
 
@@ -26,16 +25,16 @@ The goal is a simple, extensible pipeline:
 1. PC camera + MediaPipe detect face/hand state.
 2. Python program computes a small label or integer (for example: `"smile"` or `3`).
 3. Python sends the short message over a serial port to an Arduino (USB CDC / /dev/ttyACM0).
-4. Arduino translates the message to LED patterns (pins 2..6 used for finger counts, or pin 2/3 used for expression LEDs in earlier sketches).
+4. Arduino translates the message to LED patterns (pins 2..6 used for finger counts or expression signals).
 
 This repository contains multiple scripts and one Arduino sketch. Pick the script that fits what you want to test:
-- `facial_project.py` — MediaPipe FaceMesh to detect smile / neutral / frown and send text labels to Arduino.
+- `facial_project.py` — MediaPipe FaceMesh to detect smile / neutral / frown and send **numeric signals** (1=frown, 2=neutral, 3=smile) to Arduino.
 - `_5Fingers.py` — (refactored, modular) MediaPipe Hands to count how many fingers are extended and send an integer 0..5 to Arduino.
 - `serial_test.py` — small utility to list serial ports and send or read a line (useful to test the Arduino independently).
-- `arduino_code.cpp` — the Arduino sketch to receive either textual labels (older variants) or an integer count (current version), and light LEDs accordingly.
+- `arduino_code.cpp` — the Arduino sketch to receive integer counts (0..5) and light LEDs accordingly.
 
 Files in the repo (short list)
-- `facial_project.py` — face expression detection, sends labels like `smile`, `neutral`, `frown`.
+- `facial_project.py` — face expression detection, sends numeric signals: `1` (frown), `2` (neutral), `3` (smile).
 - `_5Fingers.py` — clean, modular finger counter; default sends integer counts `0\n`..`5\n`.
 - `serial_test.py` — small serial CLI tool for manual testing of the Arduino/port.
 - `arduino_code.cpp` — Arduino sketch that reads an integer and lights LEDs on pins 2..6 (first N LEDs on).
@@ -79,7 +78,7 @@ This section explains the key code in each file and how it behaves. Read this ca
   - `--verbose`: enable DEBUG logging for more details.
 
 
-2) `arduino_code.ino` (current version: integer counts 0..5)
+2) `arduino_code.cpp` (current version: integer counts 0..5)
 
 - Overview
   - The sketch reads ASCII lines from Serial terminated by `\n`.
@@ -97,13 +96,26 @@ This section explains the key code in each file and how it behaves. Read this ca
 
 - High level
   - Uses MediaPipe FaceMesh to get facial landmarks.
-  - The smile/frown detector uses these landmarks: mouth left corner (61), mouth right corner (291), upper inner lip (13), lower inner lip (14). It computes mouth width vs height and normalizes by face width. A small smoothing buffer averages normalized mouth width and corner offset for stability.
+  - The smile/frown detector (`SmileDetector` class) uses these landmarks: mouth left corner (61), mouth right corner (291), upper inner lip (13), lower inner lip (14). It computes mouth width vs height and normalizes by face width. A small smoothing buffer averages normalized mouth width and corner offset for stability.
   - The detector returns a label: `smile`, `frown`, or `neutral`. The default thresholds are tuned but may need adjustments for camera distance and face size.
-  - The script opens serial safely and sends the text label only when it changes (debounce). It overlays the detected label and the normalized mouth width value on the camera feed.
+  - The script opens serial safely and **maps labels to numeric signals** before sending:
+    - `neutral` → `2`
+    - `smile` → `3`
+    - `frown` → `1`
+  - Sends only when the label changes (debounce). It overlays the detected label and the normalized mouth width value on the camera feed.
 
 - Where to tune
-  - In `detect_smile_frown()` you can adjust `smile_norm_threshold`, `frown_norm_threshold`, and `corner_y_margin_norm` to suit your face distance and camera.
-  - Buffer length for smoothing is currently 6 frames in that script; increase for steadier detection, decrease for responsiveness.
+  - In `SmileDetector.__init__()` you can adjust `smile_thresh`, `frown_thresh`, and `corner_margin` to suit your face distance and camera.
+  - Buffer length for smoothing is `buf_size` parameter (default 6 frames); increase for steadier detection, decrease for responsiveness.
+  - CLI options: `--smooth N` sets the buffer size.
+
+- CLI options
+  - `--port`: serial device path (default `/dev/ttyACM0`).
+  - `--baud`: default 9600.
+  - `--smooth`: number of frames to smooth over (default 6).
+  - `--noserial`: run without attempting to open serial port.
+  - `--camera`: camera device index (default 0).
+  - `--verbose`: enable DEBUG logging.
 
 
 4) `serial_test.py` (manual helper)
@@ -119,15 +131,13 @@ This section explains the key code in each file and how it behaves. Read this ca
 Hardware parts & wiring
 -----------------------
 
-[![Wiring diagram](assets/circuit%20diagram.png)](wiring_diagram.png)
-
 Minimum hardware:
 - Any Arduino-compatible board with a USB serial (Uno, Nano Every, Leonardo, etc.)
-- 5 LEDs (or fewer) with current-limiting resistors (220 $\ohm$ or 330 $\ohm$ )
+- 5 LEDs (or fewer) with current-limiting resistors (220Ω or 330Ω)
 - Jumper wires / breadboard
 - USB cable from PC to Arduino
 
-Wiring (default mapping used by `arduino_code.ino`):
+Wiring (default mapping used by `arduino_code.cpp`):
 
 - LED 1: Arduino digital pin 2 → LED (with resistor) → GND
 - LED 2: Arduino digital pin 3 → LED (with resistor) → GND
@@ -135,7 +145,7 @@ Wiring (default mapping used by `arduino_code.ino`):
 - LED 4: Arduino digital pin 5 → LED (with resistor) → GND
 - LED 5: Arduino digital pin 6 → LED (with resistor) → GND
 
-Note: If you use a board with 3.3V logic or differently-powered LEDs, account for voltage/current appropriately. If you want to use a single RGB LED or a shift register/LED driver, update `arduino_code.ino` accordingly.
+Note: If you use a board with 3.3V logic or differently-powered LEDs, account for voltage/current appropriately. If you want to use a single RGB LED or a shift register/LED driver, update `arduino_code.cpp` accordingly.
 
 
 Uploading the Arduino sketch
@@ -152,14 +162,14 @@ Option B — arduino-cli (CLI)
 3. Compile and upload:
 
 ```bash
-arduino-cli compile --fqbn <your-fqbn> /path/to/arduino_code.ino
-arduino-cli upload -p /dev/ttyACM0 --fqbn <your-fqbn> /path/to/arduino_code.ino
+arduino-cli compile --fqbn <your-fqbn> /path/to/arduino_code.cpp
+arduino-cli upload -p /dev/ttyACM0 --fqbn <your-fqbn> /path/to/arduino_code.cpp
 ```
 
 
 Python dependencies & setup
 --------------------------
-I tested the Python scripts with Python 3.11, but they should work on 3.8+.
+Tested with Python 3.11, should work on 3.8+.
 
 Create a virtual environment and install dependencies:
 
@@ -167,6 +177,12 @@ Create a virtual environment and install dependencies:
 python -m venv .venv
 source .venv/bin/activate
 pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+Or manually:
+
+```bash
 pip install opencv-python mediapipe pyserial
 ```
 
@@ -196,16 +212,18 @@ Use `--noserial` to run the visual-only version if you don't want to use an Ardu
 3. Run face-expression detection (smile / neutral / frown):
 
 ```bash
-python facial_project.py
+python facial_project.py --port /dev/ttyACM0
 ```
 
-Note: `facial_project.py` is tuned to send textual labels like `smile`/`neutral`. The shipped `arduino_code.cpp` expects integers 0..5 — if you want to use face-expression script with the current Arduino sketch, change the Arduino sketch to accept labels or modify `facial_project.py` to convert expressions into numbers.
+The script now sends numeric signals (1/2/3) to the Arduino, compatible with the current `arduino_code.cpp`.
 
 
 Serial protocol summary
 ----------------------
-- Finger counter: PC -> Arduino: `N\n` where N is an integer 0..5. Arduino replies: `ACK: N`.
-- Face expression (older variant): PC -> Arduino: `smile\n` / `neutral\n` / `frown\n`. Arduino older sketches accepted these. Current `arduino_code.cpp` expects integers.
+- **Finger counter**: PC → Arduino: `N\n` where N is an integer 0..5. Arduino replies: `ACK: N`.
+- **Face expression**: PC → Arduino: `1\n` (frown), `2\n` (neutral), or `3\n` (smile). Arduino replies: `ACK: N` and lights first N LEDs.
+
+Both scripts send integers, making them compatible with the same Arduino sketch.
 
 
 Step-by-step build & test guide (DIY)
@@ -229,24 +247,46 @@ This step-by-step will get you from nothing to a working demo.
   - Run `python _5Fingers.py --port /dev/ttyACM0`.
   - Hold up a number of fingers and watch the LED pattern change after a short smoothing delay.
 
-5) (Optional) Facial expression mode
-  - Upload a different Arduino sketch that understands `smile`/`neutral` if you want to use `facial_project.py` directly, or modify `facial_project.py` to map labels to integers.
+5) Run facial expression mode
+  - Run `python facial_project.py --port /dev/ttyACM0`.
+  - Smile, frown, or stay neutral and watch the LEDs change (1, 2, or 3 LEDs respectively).
 
 
 Tuning & troubleshooting
 ------------------------
-- No serial port / permission denied: Add your user to `dialout` (Linux):
+- **No serial port / permission denied**: Add your user to `dialout` (Linux):
 
 ```bash
 sudo usermod -a -G dialout $USER
 # log out and log in again
 ```
 
-- Device busy: close other programs that may hold the port (Arduino IDE serial monitor). Check `lsof /dev/ttyACM0` or `fuser -v /dev/ttyACM0`.
+- **Device busy**: close other programs that may hold the port (Arduino IDE serial monitor). Check with:
 
-- Finger detection errors:
+```bash
+lsof /dev/ttyACM0
+# or
+fuser -v /dev/ttyACM0
+```
+
+- **Finger detection errors**:
   - Increase smoothing (`--smooth 7`) to reduce jitter.
   - If thumb detection is inverted, change `HandCounter(flipped=True)` to `flipped=False` or adjust the thumb heuristic in `HandCounter.count()`.
   - Lighting conditions and camera angle influence detection; brighter, front-facing light works best.
 
-- Face expression detection tuning: adjust thresholds in `facial_project.py` inside `detect_smile_frown()` (smile/frown ratio thresholds and corner margin).
+- **Face expression detection tuning**: 
+  - Adjust thresholds in `SmileDetector.__init__()` inside `facial_project.py` (smile_thresh, frown_thresh, corner_margin).
+  - Use `--verbose` flag to see debug output including detected values.
+
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Code of Conduct
+
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
