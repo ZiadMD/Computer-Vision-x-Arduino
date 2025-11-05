@@ -19,14 +19,12 @@ Project overview
 <table>
   <tr>
     <td align="center">
-      <a href="assets/videos/_5Fingers.mp4">
-        Video 1
-      </a>
+      <video src="assets/videos/_5Fingers.mp4"> </video>
     </td>
     <td align="center">
-      <a href="assets/videos/FacialExpression.mp4">
+      <video src="assets/videos/FacialExpression.mp4">
         Video 2
-      </a>
+      </video>
     </td>
   </tr>
 </table>
