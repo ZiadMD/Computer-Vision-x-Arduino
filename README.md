@@ -6,7 +6,6 @@ This project demonstrates computer-vision → microcontroller interaction. It us
 
 # Table of contents
 - [Project overview](#project-overview)
-- [Files in the repo (short list)](#files-in-the-repo-short-list)
 - [Code walkthrough — detailed](#code-walkthrough--detailed)
 - [Hardware parts & wiring](#hardware-parts--wiring)
 - [Uploading the Arduino sketch](#uploading-the-arduino-sketch)
@@ -32,13 +31,6 @@ This repository contains multiple scripts and one Arduino sketch. Pick the scrip
 - `_5Fingers.py` — (refactored, modular) MediaPipe Hands to count how many fingers are extended and send an integer 0..5 to Arduino.
 - `serial_test.py` — small utility to list serial ports and send or read a line (useful to test the Arduino independently).
 - `arduino_code.cpp` — the Arduino sketch to receive integer counts (0..5) and light LEDs accordingly.
-
-Files in the repo (short list)
-- `facial_project.py` — face expression detection, sends numeric signals: `1` (frown), `2` (neutral), `3` (smile).
-- `_5Fingers.py` — clean, modular finger counter; default sends integer counts `0\n`..`5\n`.
-- `serial_test.py` — small serial CLI tool for manual testing of the Arduino/port.
-- `arduino_code.cpp` — Arduino sketch that reads an integer and lights LEDs on pins 2..6 (first N LEDs on).
-- `README.md` — this file.
 
 
 Code walkthrough — detailed
