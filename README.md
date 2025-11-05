@@ -129,7 +129,7 @@ Code walkthrough — detailed
 Hardware parts & wiring
 -----------------------
 
-[![Wiring diagram](assets/circuit%20diagram.png)](wiring_diagram.png)
+[![Wiring diagram](assets/images/circuit%20diagram.png)](wiring_diagram.png)
 
 ## Minimum hardware:
 - Any Arduino-compatible board with a USB serial (Uno, Nano Every, Leonardo, etc.)
