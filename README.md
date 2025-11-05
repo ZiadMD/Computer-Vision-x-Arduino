@@ -130,6 +130,7 @@ This section explains the key code in each file and how it behaves. Read this ca
 
 Hardware parts & wiring
 -----------------------
+[![Wiring diagram](assets/circuit%20diagram.png)](wiring_diagram.png)
 
 Minimum hardware:
 - Any Arduino-compatible board with a USB serial (Uno, Nano Every, Leonardo, etc.)
