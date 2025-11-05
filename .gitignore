@@ -1,0 +1,38 @@
+# Virtual environment
+.venv/
+venv/
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Editor folders
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+*.egg-info/
+
+
+# PyCharm
+*.iml
+
+# Others
+.env.local
+
+# GitHub workflows local caches
+.github/workflows/*-cache
+
