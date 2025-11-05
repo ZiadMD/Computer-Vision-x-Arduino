@@ -27,7 +27,7 @@ The goal is a simple, extensible pipeline:
 4. Arduino translates the message to LED patterns (pins 2..6 used for finger counts or expression signals).
 
 This repository contains multiple scripts and one Arduino sketch. Pick the script that fits what you want to test:
-- `facial_project.py` — MediaPipe FaceMesh to detect smile / neutral / frown and send **numeric signals** (1=frown, 2=neutral, 3=smile) to Arduino.
+- `FacialExpression.py` — MediaPipe FaceMesh to detect smile / neutral / frown and send **numeric signals** (1=frown, 2=neutral, 3=smile) to Arduino.
 - `_5Fingers.py` — (refactored, modular) MediaPipe Hands to count how many fingers are extended and send an integer 0..5 to Arduino.
 - `serial_test.py` — small utility to list serial ports and send or read a line (useful to test the Arduino independently).
 - `arduino_code.cpp` — the Arduino sketch to receive integer counts (0..5) and light LEDs accordingly.
@@ -84,7 +84,7 @@ This section explains the key code in each file and how it behaves. Read this ca
   - Arduino -> PC: `ACK: <n>\n` (or `ERR: <text>` for invalid commands).
 
 
-3) `facial_project.py` (face expression → Arduino)
+3) `FacialExpression.py` (face expression → Arduino)
 
 - High level
   - Uses MediaPipe FaceMesh to get facial landmarks.
@@ -205,7 +205,7 @@ Use `--noserial` to run the visual-only version if you don't want to use an Ardu
 3. Run face-expression detection (smile / neutral / frown):
 
 ```bash
-python facial_project.py --port /dev/ttyACM0
+python FacialExpression.py --port /dev/ttyACM0
 ```
 
 The script now sends numeric signals (1/2/3) to the Arduino, compatible with the current `arduino_code.cpp`.
@@ -241,7 +241,7 @@ This step-by-step will get you from nothing to a working demo.
   - Hold up a number of fingers and watch the LED pattern change after a short smoothing delay.
 
 5) Run facial expression mode
-  - Run `python facial_project.py --port /dev/ttyACM0`.
+  - Run `python FacialExpression.py --port /dev/ttyACM0`.
   - Smile, frown, or stay neutral and watch the LEDs change (1, 2, or 3 LEDs respectively).
 
 
@@ -268,5 +268,5 @@ fuser -v /dev/ttyACM0
   - Lighting conditions and camera angle influence detection; brighter, front-facing light works best.
 
 - **Face expression detection tuning**: 
-  - Adjust thresholds in `SmileDetector.__init__()` inside `facial_project.py` (smile_thresh, frown_thresh, corner_margin).
+  - Adjust thresholds in `SmileDetector.__init__()` inside `FacialExpression.py` (smile_thresh, frown_thresh, corner_margin).
   - Use `--verbose` flag to see debug output including detected values.

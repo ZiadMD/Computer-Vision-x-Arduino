@@ -1,16 +1,3 @@
-"""
-Face expression detector (smile / neutral / frown) using MediaPipe FaceMesh.
-Sends short labels over serial to an Arduino (optional) and displays a live preview.
-
-Usage:
-  python facial_project.py                # open /dev/ttyACM0 at 9600 and run
-  python facial_project.py --noserial     # run without Arduino
-  python facial_project.py --verbose     # enable debug logging
-  python facial_project.py --port /dev/ttyACM1 --smooth 8 --camera 1
-
-The script is organized for readability and easy extension.
-"""
-
 import argparse
 import logging
 import time

@@ -1,14 +1,3 @@
-"""
-Finger counting with MediaPipe Hands and optional Arduino output.
-
-Usage examples:
-  python _5Fingers.py               # default: port /dev/ttyACM0, sends counts to Arduino
-  python _5Fingers.py --noserial    # run without serial output (visual only)
-  python _5Fingers.py --port /dev/ttyACM1 --baud 115200 --smooth 7
-
-The script is organized for readability and easy extension.
-"""
-
 import argparse
 import logging
 import time
@@ -39,7 +28,7 @@ FINGER_TIP_IDS = [4, 8, 12, 16, 20]
 
 
 # ---------------------------------------------------------------------------
-# Serial helper (optional)
+# Serial helper
 # ---------------------------------------------------------------------------
 class SerialClient:
     """Simple serial wrapper that tries to open a port and provides a send() method.
@@ -105,14 +94,9 @@ class SerialClient:
 
 
 # ---------------------------------------------------------------------------
-# Hand counting logic (encapsulated for testability)
+# Hand counting logic
 # ---------------------------------------------------------------------------
 class HandCounter:
-    """Encapsulates finger counting heuristics.
-
-    The default heuristics are simple and work well for many cases. The class
-    is designed so rules can be tuned or replaced later.
-    """
 
     def __init__(self, assume_right_hand: bool = True, flipped: bool = True):
         self.assume_right_hand = assume_right_hand

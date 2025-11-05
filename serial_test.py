@@ -1,10 +1,3 @@
-# Simple serial test utility for the CVxArduino project
-# Usage examples:
-#  python serial_test.py --list
-#  python serial_test.py --port /dev/ttyACM0 --baud 9600 --send "Hello\n"
-#  python serial_test.py --port /dev/ttyACM0 --baud 9600 --echo 5   (read for 5 seconds)
-#  python serial_test.py --port /dev/ttyACM0 --baud 9600 --interactive
-
 import argparse
 import sys
 import time
