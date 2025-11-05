@@ -20,14 +20,12 @@ Project overview
   <tr>
     <td align="center">
       <a href="assets/videos/_5Fingers.mp4">
-        <img src="assets/images/_5Fingers%20Thumbnail.png" alt="Video 1"><br>
-        Video 1
+        <img src="assets/images/_5Fingers%20Thumbnail.png" alt="Video 1">
       </a>
     </td>
     <td align="center">
       <a href="assets/videos/FacialExpression.mp4">
-        <img src="assets/images/FacialExpression%20Thumbnail.png" alt="Video 2"><br>
-        Video 2
+        <img src="assets/images/FacialExpression%20Thumbnail.png" alt="Video 2">
       </a>
     </td>
   </tr>
